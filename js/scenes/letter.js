@@ -6,9 +6,9 @@
    alguien lo estuviera redactando en ese momento.
 
    Cierre: al terminar el mensaje, el cursor parpadea un instante,
-   se desvanece lentamente, caen pétalos sobre la carta y, tras un
-   breve respiro, se revela el mensaje final. La experiencia termina
-   aquí, en calma.
+   se desvanece lentamente, caen pétalos sobre la carta, se revela
+   el mensaje final, el papel se repliega suavemente y aparece un
+   botón para volver a florecer (reinicia la experiencia).
 
    Expone sobre `Flores.scenes.letter`.
 ============================================================ */
@@ -22,6 +22,7 @@
 
   var root = null;
   var cancelled = false;
+  var replayHandler = null;
 
   // Mensaje definitivo de la carta (sin firma).
   var LINES = [
@@ -47,17 +48,21 @@
     root = container;
     cancelled = false;
     reset();
+    bindReplay();
     runSequence();
     if (typeof done === "function") done();
   }
 
   function destroy() {
     cancelled = true;
+    var btn = dom.$(".letter__replay-btn", root);
+    if (btn && replayHandler) btn.removeEventListener("click", replayHandler);
+    replayHandler = null;
     root = null;
   }
 
   function reset() {
-    dom.$$(".letter__eyebrow, .letter__line, .letter__petals, .letter__ending, .letter__paper", root).forEach(function (el) {
+    dom.$$(".letter__eyebrow, .letter__line, .letter__petals, .letter__ending, .letter__paper, .letter__replay-btn", root).forEach(function (el) {
       Array.prototype.slice.call(el.classList).forEach(function (c) {
         if (c.indexOf("is-") === 0) el.classList.remove(c);
       });
@@ -66,6 +71,15 @@
     dom.$$(".letter__petal", root).forEach(function (p) {
       if (p.parentNode) p.parentNode.removeChild(p);
     });
+  }
+
+  // "Volver a florecer" reinicia la experiencia desde el principio.
+  function bindReplay() {
+    var btn = dom.$(".letter__replay-btn", root);
+    if (!btn) return;
+    if (replayHandler) btn.removeEventListener("click", replayHandler);
+    replayHandler = function () { window.Flores.goTo("intro"); };
+    btn.addEventListener("click", replayHandler);
   }
 
   /* ---------- Secuencia de escritura ---------- */
@@ -126,6 +140,16 @@
 
     // Cierre tranquilo y emotivo: el mensaje final se revela.
     showEnding();
+    await pause(2600);
+    if (cancelled) return;
+
+    // La carta se repliega suavemente (los pétalos siguen cayendo).
+    dom.$(".letter__paper", root).classList.add("is-closing");
+    await pause(1150);
+    if (cancelled) return;
+
+    // Invitación a volver a florecer.
+    dom.$(".letter__replay-btn", root).classList.add("is-visible");
   }
 
   // Revela el mensaje de despedida al final de la carta.
