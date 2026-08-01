@@ -1,0 +1,553 @@
+/* ============================================================
+   garden.css — Escena: El jardín (historia de la semilla)
+   ------------------------------------------------------------
+   Una única animación continua controlada por garden.js.
+   La planta se construye con divs animando solo transform y
+   opacity (compositor GPU → 60fps en móviles) y un trazo SVG
+   (la raíz) dibujado con stroke-dashoffset.
+
+   Geometría de referencia:
+     --ground   : línea del suelo (%), ancla inferior de la planta
+     --plant-h  : altura total de la planta
+============================================================ */
+
+.garden__world {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;          /* se reactiva solo sobre la semilla */
+
+  --ground: 20%;
+  --plant-h: clamp(150px, 30vmin, 250px);
+}
+
+/* ================= Suelo ================= */
+.garden__soil {
+  position: absolute;
+  left: 50%;
+  bottom: var(--ground);
+  width: 260px;
+  height: 30px;
+  transform: translate(-50%, 50%) scale(0.6);
+  transform-origin: center bottom;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(122, 200, 160, 0.18),
+    rgba(122, 200, 160, 0.05) 55%,
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.garden__soil.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 50%) scale(1);
+}
+
+/* ================= Destello que cae ================= */
+.garden__spark {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.garden__spark.is-visible { opacity: 1; }
+.garden__spark.is-landed { opacity: 0; transition: opacity 0.5s; }
+
+.garden__spark-core {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, var(--color-accent-gold) 45%, transparent 72%);
+  box-shadow: 0 0 18px 6px rgba(246, 196, 83, 0.65);
+  animation: garden-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes garden-pulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.9; }
+  50%      { transform: scale(1.15); opacity: 1; }
+}
+
+/* ================= Semilla ================= */
+.garden__seed {
+  position: absolute;
+  left: 50%;
+  bottom: var(--ground);
+  width: 54px;
+  height: 54px;
+  margin-left: -27px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  pointer-events: none;          /* activa solo cuando nace */
+  touch-action: manipulation;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.garden__seed.is-born { opacity: 1; pointer-events: auto; }
+
+.garden__seed-core {
+  width: 16px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ecd9a6, #b98a4f 70%);
+  box-shadow: 0 0 16px rgba(246, 196, 83, 0.35);
+  transform: scale(0);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.garden__seed.is-born .garden__seed-core { transform: scale(1); }
+.garden__seed.is-seeded .garden__seed-core { transform: scale(1.18); box-shadow: 0 0 22px rgba(246, 196, 83, 0.55); }
+.garden__seed.is-tapped .garden__seed-core { transform: scale(0.82); }
+
+/* ================= Raíz (SVG) ================= */
+.garden__root {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--ground) - 48px);
+  width: 44px;
+  height: 64px;
+  transform: translateX(-50%);
+}
+.garden__root-path {
+  fill: none;
+  stroke: #7a5c3e;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.85;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 0.9s ease-out;
+}
+.garden__root.is-drawn .garden__root-path { stroke-dashoffset: 0; }
+
+/* ================= Tallo ================= */
+.garden__stem {
+  position: absolute;
+  left: 50%;
+  bottom: var(--ground);
+  width: 5px;
+  height: var(--plant-h);
+  margin-left: -2.5px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #3f9d6b, #2c7a50);
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  transition: transform 1s var(--ease-out);
+  will-change: transform;
+}
+.garden__stem.is-grown--half { transform: scaleY(0.32); }
+.garden__stem.is-grown { transform: scaleY(1); }
+
+/* ================= Cotiledones (brote) ================= */
+.garden__cotyledon {
+  position: absolute;
+  width: 14px;
+  height: 16px;
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(140deg, #8adfa8, #3f9d6b);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+}
+.garden__cotyledon--1 {
+  right: calc(50% + 1px);
+  bottom: calc(var(--ground) + var(--plant-h) * 0.30);
+  transform-origin: 100% 50%;
+  transform: rotate(-34deg) scale(0);
+}
+.garden__cotyledon--1.is-visible { transform: rotate(-34deg) scale(1); }
+.garden__cotyledon--2 {
+  left: calc(50% + 1px);
+  bottom: calc(var(--ground) + var(--plant-h) * 0.34);
+  transform-origin: 0 50%;
+  transform: scaleX(-1) rotate(-34deg) scale(0);
+}
+.garden__cotyledon--2.is-visible { transform: scaleX(-1) rotate(-34deg) scale(1); }
+.garden__cotyledon.is-visible { opacity: 1; }
+
+/* ================= Hojas ================= */
+.garden__leaf {
+  position: absolute;
+  width: 36px;
+  height: 20px;
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(140deg, #7cd79e, #2f8f5b);
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+  will-change: transform;
+}
+
+/* Hojas izquierdas: pivotean desde el tallo (origen derecho) */
+.garden__leaf--l1 {
+  right: calc(50% + 2px);
+  bottom: calc(var(--ground) + var(--plant-h) * 0.20);
+  transform-origin: 100% 50%;
+  transform: rotate(-34deg) scale(0);
+}
+.garden__leaf--l1.is-visible { transform: rotate(-34deg) scale(1); }
+
+.garden__leaf--l2 {
+  right: calc(50% + 2px);
+  bottom: calc(var(--ground) + var(--plant-h) * 0.48);
+  transform-origin: 100% 50%;
+  transform: rotate(-40deg) scale(0);
+}
+.garden__leaf--l2.is-visible { transform: rotate(-40deg) scale(1); }
+
+/* Hojas derechas: espejo */
+.garden__leaf--r1 {
+  left: calc(50% + 2px);
+  bottom: calc(var(--ground) + var(--plant-h) * 0.28);
+  transform-origin: 0 50%;
+  transform: scaleX(-1) rotate(-34deg) scale(0);
+}
+.garden__leaf--r1.is-visible { transform: scaleX(-1) rotate(-34deg) scale(1); }
+
+.garden__leaf--r2 {
+  left: calc(50% + 2px);
+  bottom: calc(var(--ground) + var(--plant-h) * 0.56);
+  transform-origin: 0 50%;
+  transform: scaleX(-1) rotate(-40deg) scale(0);
+}
+.garden__leaf--r2.is-visible { transform: scaleX(-1) rotate(-40deg) scale(1); }
+
+.garden__leaf.is-visible { opacity: 1; }
+
+/* ================= Capullo ================= */
+.garden__bud {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--ground) + var(--plant-h) - 4px);
+  width: 22px;
+  height: 32px;
+  margin-left: -11px;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: linear-gradient(160deg, var(--color-accent-purple), #6f3cd0);
+  box-shadow: 0 0 20px rgba(166, 107, 255, 0.4);
+  transform: scale(0);
+  transform-origin: bottom center;
+  transition: transform 0.7s var(--ease-out), opacity 0.6s;
+  will-change: transform;
+}
+.garden__bud.is-visible { transform: scale(1); }
+.garden__bud.is-hiding { opacity: 0; }
+
+/* ================= Flor principal ================= */
+.garden__flower {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--ground) + var(--plant-h) + 14px);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+.garden__flower.is-bloomed { opacity: 1; }
+
+.garden__glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 130px;
+  height: 130px;
+  margin: -65px 0 0 -65px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 182, 214, 0.5), rgba(255, 126, 182, 0.14) 45%, transparent 70%);
+  transform: scale(0.4);
+  transition: transform 1s var(--ease-out);
+}
+.garden__flower.is-bloomed .garden__glow { transform: scale(1); }
+
+.garden__petal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 30px;
+  height: 52px;
+  margin: -26px 0 0 -15px;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: linear-gradient(165deg, #ffe0ec, var(--color-accent-pink) 70%);
+  box-shadow: inset 0 -8px 14px rgba(214, 82, 140, 0.35);
+  transform-origin: 50% 50%;
+  transform: rotate(var(--r)) translateY(-30px) scale(0);
+  transition: transform 0.55s var(--ease-out);
+  will-change: transform;
+}
+.garden__flower.is-bloomed .garden__petal {
+  transform: rotate(var(--r)) translateY(-30px) scale(1);
+}
+
+.garden__petal--0 { --r: 0deg;    transition-delay: 0ms; }
+.garden__petal--1 { --r: 45deg;   transition-delay: 45ms; }
+.garden__petal--2 { --r: 90deg;   transition-delay: 90ms; }
+.garden__petal--3 { --r: 135deg;  transition-delay: 135ms; }
+.garden__petal--4 { --r: 180deg;  transition-delay: 180ms; }
+.garden__petal--5 { --r: 225deg;  transition-delay: 225ms; }
+.garden__petal--6 { --r: 270deg;  transition-delay: 270ms; }
+.garden__petal--7 { --r: 315deg;  transition-delay: 315ms; }
+
+.garden__center {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7d6, var(--color-accent-gold) 60%);
+  box-shadow: 0 0 18px 6px rgba(246, 196, 83, 0.55);
+  transform: scale(0);
+  transition: transform 0.6s var(--ease-out) 0.3s;
+}
+.garden__flower.is-bloomed .garden__center { transform: scale(1); }
+
+/* ================= Brillo de la floración ================= */
+.garden__shine {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--ground) + var(--plant-h) + 14px);
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff, rgba(255, 240, 200, 0.9) 30%, transparent 65%);
+  opacity: 0;
+}
+.garden__shine.is-active {
+  animation: garden-shine 0.9s var(--ease-out) forwards;
+}
+
+@keyframes garden-shine {
+  0%   { opacity: 0; transform: scale(0.2); }
+  30%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+/* ================= Campo de flores (expansión final) ================= */
+/* Generado dinámicamente por garden.js: 60–100 flores que reutilizan
+   pocos modelos con variación de posición, escala, rotación y color.
+   Solo se animan transform y opacity (compositor GPU). */
+.garden__field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Contenedor de cada flor: posición, rotación y escala propias.
+   Aparece con un "pop" elástico tras su retardo (--fl-delay). */
+.field-flower {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transform: translate(-50%, 0) rotate(var(--fl-rot, 0deg)) scale(0);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition-delay: var(--fl-delay, 0ms);
+}
+.field-flower.is-blown {
+  opacity: 1;
+  transform: translate(-50%, 0) rotate(var(--fl-rot, 0deg)) scale(var(--fl-scale, 1));
+}
+
+/* Balanceo suave con el viento (solo en un subconjunto) */
+.field-flower-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+.field-flower.is-sway .field-flower-inner {
+  animation: field-sway var(--fl-sway, 6s) ease-in-out infinite;
+  animation-delay: var(--fl-sway-delay, 0s);
+}
+
+@keyframes field-sway {
+  0%, 100% { transform: rotate(-2.5deg) translateX(-2px); }
+  50%      { transform: rotate(3deg) translateX(2px); }
+}
+
+.field-flower-petal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 30px;
+  margin: -15px 0 0 -10px;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  transform-origin: 50% 50%;
+  box-shadow: inset 0 -5px 9px rgba(0, 0, 0, 0.12);
+}
+
+.field-flower-center {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7d6, var(--color-accent-gold) 60%);
+  box-shadow: 0 0 8px 2px rgba(246, 196, 83, 0.5);
+}
+
+/* ================= "Y, de pronto..." ================= */
+.garden__bloom-text {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: max-content;
+  max-width: 92vw;
+  text-align: center;
+  transition: opacity 1.2s var(--ease-out);
+}
+.garden__bloom-text.is-hiding { opacity: 0; }
+
+.garden__bloom-line {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.2rem, 5vw, 2rem);
+  line-height: 1.4;
+  color: var(--color-text);
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.65);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 2s var(--ease-out), transform 2s var(--ease-out);
+}
+.garden__bloom-line.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ================= Pétalos ambiente (fase final) ================= */
+.garden__ambient {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.5s;
+}
+.garden__world.is-living .garden__ambient { opacity: 1; }
+
+.garden__petal-fall {
+  position: absolute;
+  top: -32px;
+  width: 14px;
+  height: 18px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  opacity: 0;
+  animation: garden-fall 9s linear infinite;
+}
+.garden__petal-fall--1 { left: 10%;  background: linear-gradient(160deg, #ffe0ec, var(--color-accent-pink)); animation-delay: 0s; }
+.garden__petal-fall--2 { left: 26%;  background: linear-gradient(160deg, #e6d9ff, var(--color-accent-purple)); animation-delay: 2.2s; }
+.garden__petal-fall--3 { left: 42%;  background: linear-gradient(160deg, #ffe0ec, var(--color-accent-pink)); animation-delay: 1s; }
+.garden__petal-fall--4 { left: 58%;  background: linear-gradient(160deg, #fff3d0, var(--color-accent-gold)); animation-delay: 3.4s; }
+.garden__petal-fall--5 { left: 71%;  background: linear-gradient(160deg, #e6d9ff, var(--color-accent-purple)); animation-delay: 0.6s; }
+.garden__petal-fall--6 { left: 83%;  background: linear-gradient(160deg, #ffe0ec, var(--color-accent-pink)); animation-delay: 2.8s; }
+.garden__petal-fall--7 { left: 92%;  background: linear-gradient(160deg, #fff3d0, var(--color-accent-gold)); animation-delay: 4.2s; }
+
+@keyframes garden-fall {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  8%   { opacity: 0.85; }
+  100% { transform: translateY(110vh) translateX(44px) rotate(340deg); opacity: 0; }
+}
+
+/* ================= Textos de la escena ================= */
+.garden__intro {
+  position: absolute;
+  top: 32%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  max-width: 88vw;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.15rem, 4.5vw, 1.7rem);
+  line-height: 1.5;
+  color: var(--color-text);
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+}
+.garden__intro.is-visible { opacity: 1; }
+.garden__intro.is-hiding { opacity: 0; transition-duration: 0.6s; }
+
+.garden__intro-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 4px;
+  vertical-align: -0.12em;
+  background: var(--color-accent-pink);
+  box-shadow: 0 0 10px var(--color-accent-pink);
+  animation: garden-blink 1s steps(2, start) infinite;
+}
+
+@keyframes garden-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+.garden__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  transform: translateX(-50%);
+  color: var(--color-accent-gold);
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+}
+.garden__hint.is-visible { opacity: 1; }
+.garden__hint.is-hiding { opacity: 0; }
+
+.garden__phrases {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: max-content;
+  max-width: 92vw;
+}
+
+.garden__phrase {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  color: rgba(245, 238, 247, 0.88);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1.8s var(--ease-out), transform 1.8s var(--ease-out);
+}
+.garden__phrase.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ================= Responsive ================= */
+@media (max-height: 480px) {
+  .garden__world { --plant-h: 130px; }
+  .garden__intro { top: 26%; }
+}
+
+@media (max-width: 480px) {
+  .garden__soil { width: 210px; }
+}

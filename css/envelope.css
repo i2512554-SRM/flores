@@ -1,0 +1,383 @@
+/* ============================================================
+   envelope.css — Escenas: El sobre y La carta
+   ------------------------------------------------------------
+   El sobre se construye por capas (tapa, bolsillo frontal, carta,
+   sello) y se abre en 3D. La carta tiene apariencia de papel real:
+   tono marfil, textura ligera de fibras y sombras suaves múltiples.
+
+   Las animaciones usan transform y opacity (compositor GPU).
+============================================================ */
+
+/* ================= Escena: El sobre ================= */
+
+/* Mensaje previo: "Hay unas últimas palabras para ti..." */
+.envelope__message {
+  position: relative;
+  margin-bottom: var(--space-5);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.15rem, 4.5vw, 1.7rem);
+  line-height: 1.5;
+  color: var(--color-text);
+  max-width: 88vw;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+}
+.envelope__message.is-visible { opacity: 1; }
+.envelope__message.is-hiding { opacity: 0; transition-duration: 0.6s; }
+
+.envelope__message-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 4px;
+  vertical-align: -0.12em;
+  background: var(--color-accent-gold);
+  box-shadow: 0 0 10px rgba(246, 196, 83, 0.7);
+  animation: envelope-blink 1s steps(2, start) infinite;
+}
+
+@keyframes envelope-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* El sobre: un <button> real (accesible) que sube desde abajo.
+   --env-w / --env-h definen su tamaño en función del viewport. */
+.envelope__wrap {
+  position: relative;
+  width: var(--env-w);
+  height: var(--env-h);
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  perspective: 900px;
+
+  --env-w: min(72vw, 300px);
+  --env-h: calc(var(--env-w) * 0.62);
+
+  opacity: 0;
+  transform: translateY(90px);
+  transition:
+    opacity 1.2s var(--ease-out),
+    transform 1.2s var(--ease-out),
+    box-shadow 0.8s var(--ease-out);
+}
+.envelope__wrap.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Acomodo al pasar por encima (escritorio) */
+.envelope__wrap:hover { transform: translateY(-4px); }
+.envelope__wrap:active { transform: translateY(-1px) scale(0.99); }
+
+/* Invitación a abrir: un resplandor dorado muy sutil */
+.envelope__wrap.is-ready {
+  box-shadow:
+    0 0 0 1px rgba(246, 196, 83, 0.28),
+    0 0 46px rgba(246, 196, 83, 0.16);
+  border-radius: 4px;
+}
+
+/* Salida: el sobre se retira suavemente */
+.envelope__wrap.is-fading {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.9s var(--ease-in-out),
+    transform 0.9s var(--ease-in-out),
+    box-shadow 0.9s var(--ease-in-out);
+}
+
+/* Sombra suave bajo el sobre */
+.envelope__shadow {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -16px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.5), transparent 70%);
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-out);
+}
+.envelope__wrap.is-visible .envelope__shadow { opacity: 1; }
+.envelope__wrap.is-fading .envelope__shadow { opacity: 0; }
+
+/* ---- Capas del sobre ---- */
+.envelope__back,
+.envelope__front,
+.envelope__flap {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+}
+
+.envelope__back {
+  z-index: 1;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #2e2440, #241b33);
+  box-shadow: inset 0 0 0 1px rgba(246, 196, 83, 0.16);
+}
+
+/* Bolsillo frontal: el borde superior es una V hacia abajo */
+.envelope__front {
+  z-index: 3;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #352a4e, #2a2140);
+  clip-path: polygon(0 0, 50% 62%, 100% 0, 100% 100%, 0 100%);
+  box-shadow: inset 0 0 0 1px rgba(246, 196, 83, 0.1);
+}
+
+/* Tapa triangular: rota sobre el borde superior al abrir */
+.envelope__flap {
+  z-index: 4;
+  height: 56%;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #3a2d55, #2c2340);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center;
+  transform: rotateX(0deg);
+  backface-visibility: hidden;
+  transition: transform 1s var(--ease-out), z-index 0s 0.95s;
+  box-shadow: inset 0 0 0 1px rgba(246, 196, 83, 0.14);
+}
+.envelope__wrap.is-opening .envelope__flap {
+  transform: rotateX(180deg);
+  z-index: 1;
+}
+
+/* Sello de cera dorado sobre la punta de la tapa */
+.envelope__seal {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  z-index: 5;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f9d98a, #cf8f2b 72%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), inset 0 0 0 2px rgba(255, 255, 255, 0.16);
+  transition: transform 0.7s var(--ease-out), opacity 0.7s var(--ease-out);
+}
+.envelope__seal::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.envelope__wrap.is-opening .envelope__seal {
+  transform: scale(1.7);
+  opacity: 0;
+}
+.envelope__wrap.is-ready .envelope__seal {
+  animation: seal-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes seal-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), 0 0 0 0 rgba(246, 196, 83, 0.35);
+  }
+  50% {
+    transform: scale(1.12);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), 0 0 24px 6px rgba(246, 196, 83, 0.35);
+  }
+}
+
+/* La carta dentro del sobre (sube al emerger) */
+.envelope__letter {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  top: 7px;
+  height: calc(var(--env-h) - 30px);
+  z-index: 2;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(0deg, rgba(180, 150, 110, 0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #fdf8ec, #f5ecd8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  transform: translateY(0);
+  transition: transform 1.15s var(--ease-out), box-shadow 1.15s var(--ease-out);
+}
+.envelope__letter.is-peeking {
+  transform: translateY(-72px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+.envelope__letter.is-emerging {
+  transform: translateY(-215px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* ================= Escena: La carta ================= */
+
+/* Papel con aspecto real: tono marfil, fibras, sombras suaves múltiples */
+.letter__paper {
+  position: relative;
+  width: min(88vw, 420px);
+  max-height: 82vh;
+  overflow-y: auto;
+  padding: clamp(22px, 6vw, 44px) clamp(20px, 5vw, 40px);
+  border-radius: 3px;
+  text-align: left;
+  background:
+    repeating-linear-gradient(0deg, rgba(160, 130, 90, 0.055) 0 1px, transparent 1px 3px),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
+    linear-gradient(180deg, #fdf8ec, #f6edd9);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    inset 0 0 40px rgba(160, 120, 70, 0.06);
+}
+
+/* Entrada elegante: el papel "se despliega" al activarse la escena */
+.scene-letter.is-active .letter__paper {
+  animation: letter-unfold 1.4s var(--ease-out) both;
+}
+
+@keyframes letter-unfold {
+  0%   { opacity: 0; transform: translateY(18px) scale(0.95) rotate(-0.5deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+}
+
+/* Pequeño movimiento natural: el papel flota suavemente mientras se lee.
+   (letter.js lo activa al terminar el despliegue, is-settled). */
+.letter__paper.is-settled {
+  animation: letter-float 10s ease-in-out infinite;
+}
+
+@keyframes letter-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+.letter__eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  text-transform: uppercase;
+  color: #8a5a2c;                        /* contraste suficiente sobre el papel */
+  margin-bottom: var(--space-3);
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+}
+.letter__eyebrow.is-visible { opacity: 1; }
+
+.letter__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+/* Mensaje de despedida que cierra la carta (se revela al final) */
+.letter__ending {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(160, 116, 63, 0.28);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1rem, 4vw, 1.35rem);
+  line-height: 1.5;
+  color: #6b5434;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1.6s var(--ease-out), transform 1.6s var(--ease-out);
+}
+.letter__ending.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.letter__line {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.05rem, 4.2vw, 1.5rem);
+  line-height: 1.55;
+  color: #3d3223;
+  min-height: 1.6em;                       /* reserva espacio al escribir */
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
+}
+.letter__line.is-visible { opacity: 1; transform: none; }
+
+.letter__line-cursor {
+  display: none;
+  width: 2px;
+  height: 0.85em;
+  margin-left: 3px;
+  vertical-align: -0.12em;
+  background: #a0743f;
+  animation: envelope-blink 1s steps(2, start) infinite;
+}
+.letter__line.is-typing .letter__line-cursor,
+.letter__line.is-finished .letter__line-cursor { display: inline-block; }
+
+/* Cierre: el cursor deja de parpadear y se desvanece lentamente. */
+.letter__line.is-faded .letter__line-cursor {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+}
+
+/* Pétalos que caen sobre la carta al cierre de la escena */
+.letter__petals {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-out);
+}
+.letter__petals.is-falling { opacity: 1; }
+
+.letter__petal {
+  position: absolute;
+  top: -24px;
+  width: 14px;
+  height: 18px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  opacity: 0;
+  animation: letter-petal-fall var(--petal-dur, 6s) var(--ease-in-out) var(--petal-delay, 0s) infinite;
+}
+
+@keyframes letter-petal-fall {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  7%   { opacity: 0.9; }
+  100% { transform: translateY(100vh) translateX(48px) rotate(340deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter__petal { animation: none; opacity: 0; }
+}
+
+/* ================= Responsive ================= */
+@media (max-width: 480px) {
+  .envelope__message { margin-bottom: var(--space-4); }
+
+  /* La carta se compacta en pantallas pequeñas para que el texto
+     no desborde y quepan los seis párrafos sin scroll excesivo. */
+  .letter__paper {
+    padding: clamp(18px, 5vw, 30px);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  .letter__line {
+    font-size: clamp(0.98rem, 4.4vw, 1.25rem);
+  }
+  .letter__ending {
+    font-size: clamp(0.95rem, 4vw, 1.2rem);
+  }
+}

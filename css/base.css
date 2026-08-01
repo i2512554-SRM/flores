@@ -1,0 +1,86 @@
+/* ============================================================
+   base.css — Reset, tipografía y utilidades generales
+============================================================ */
+
+/* ---------------- Reset ligero ---------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* La experiencia es a pantalla completa: sin scroll global */
+  height: 100vh;
+  height: 100dvh;                       /* altura real en móviles modernos */
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: var(--color-accent-pink);
+  text-decoration: none;
+}
+
+/* ---------------- Tipografía auxiliar ---------------- */
+.text-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+/* ---------------- Utilidades ---------------- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ---------------- Accesibilidad ---------------- */
+:focus-visible {
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 3px;
+}
+
+/* ---------------- Movimiento reducido ---------------- */
+/* Si el usuario prefiere menos animación, se minimizan todas. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

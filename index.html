@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Una experiencia romántica e interactiva para el Día de las Flores." />
+  <meta name="theme-color" content="#0d0a12" />
+
+  <title>Día de las Flores</title>
+
+  <!--
+    Tipografías desde Google Fonts (CDN).
+    Para despliegue totalmente offline, descargar los woff2 en assets/fonts/
+    y sustituir este <link> por @font-face locales en variables.css.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Hojas de estilo -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/scenes.css" />
+  <link rel="stylesheet" href="css/garden.css" />
+  <link rel="stylesheet" href="css/envelope.css" />
+</head>
+
+<body>
+  <!-- ============================================================
+       ESCENARIO PRINCIPAL
+       Experiencia de una sola página: todas las escenas viven aquí
+       como <section>. El gestor de escenas (js/main.js) alterna la
+       clase .is-active para mostrar/ocultar cada una con transición.
+  ============================================================ -->
+  <main id="stage" class="stage">
+
+    <!-- Fondo fijo compartido por todas las escenas -->
+    <div id="backdrop" class="backdrop" aria-hidden="true"></div>
+
+    <!-- Escena 1 · Introducción -->
+    <section id="scene-intro" class="scene is-active" data-scene="intro" aria-label="Introducción">
+
+      <!-- Cielo estrellado (3 capas con profundidad, generadas por intro.js) -->
+      <div class="intro__stars" aria-hidden="true">
+        <div class="intro__stars-layer intro__stars-layer--1"></div>
+        <div class="intro__stars-layer intro__stars-layer--2"></div>
+        <div class="intro__stars-layer intro__stars-layer--3"></div>
+      </div>
+
+      <div class="intro__content">
+        <!-- Cabecera mínima -->
+        <p class="intro__eyebrow">Para ti</p>
+
+        <!-- Frases que se escriben una a una -->
+        <div class="intro__lines">
+          <p class="intro__line">
+            <span class="intro__line-text"></span><span class="intro__line-cursor" aria-hidden="true"></span>
+          </p>
+          <p class="intro__line">
+            <span class="intro__line-text"></span><span class="intro__line-cursor" aria-hidden="true"></span>
+          </p>
+          <p class="intro__line">
+            <span class="intro__line-text"></span><span class="intro__line-cursor" aria-hidden="true"></span>
+          </p>
+        </div>
+
+        <!-- Único botón de la intro -->
+        <button class="intro__start" type="button">Comenzar</button>
+      </div>
+    </section>
+
+    <!-- Escena 2 · El jardín (historia de la semilla) -->
+    <section id="scene-garden" class="scene scene--scale" data-scene="garden" aria-label="El jardín">
+
+      <!-- Mensaje inicial (se escribe con typing.js) -->
+      <p class="garden__intro">
+        <span class="garden__intro-text"></span><span class="garden__intro-cursor" aria-hidden="true"></span>
+      </p>
+
+      <!-- Texto "Tócala." que aparece al nacer la semilla -->
+      <p class="garden__hint">Tócala.</p>
+
+      <!-- Frases que se revelan durante el crecimiento -->
+      <div class="garden__phrases" role="text">
+        <p class="garden__phrase">Hay personas...</p>
+        <p class="garden__phrase">...que llegan sin hacer ruido...</p>
+        <p class="garden__phrase">...y cambian el paisaje por completo.</p>
+      </div>
+
+      <!-- Texto previo a la expansión final -->
+      <div class="garden__bloom-text" role="text">
+        <p class="garden__bloom-line">Y, de pronto...</p>
+        <p class="garden__bloom-line">...todo empezó a florecer.</p>
+      </div>
+
+      <!-- El mundo del jardín -->
+      <div class="garden__world" aria-hidden="true">
+
+        <!-- Suelo -->
+        <div class="garden__soil"></div>
+
+        <!-- Destello que cae -->
+        <div class="garden__spark">
+          <span class="garden__spark-core"></span>
+        </div>
+
+        <!-- Planta principal -->
+        <div class="garden__plant">
+          <!-- Semilla -->
+          <div class="garden__seed">
+            <span class="garden__seed-core"></span>
+          </div>
+
+          <!-- Raíz (trazada con SVG) -->
+          <svg class="garden__root" viewBox="0 0 44 64" fill="none" aria-hidden="true">
+            <path class="garden__root-path" pathLength="100" d="M22 2 C 14 16 28 30 16 44 C 12 52 16 58 22 62" />
+          </svg>
+
+          <!-- Tallo -->
+          <div class="garden__stem"></div>
+
+          <!-- Cotiledones del brote -->
+          <div class="garden__cotyledon garden__cotyledon--1"></div>
+          <div class="garden__cotyledon garden__cotyledon--2"></div>
+
+          <!-- Hojas -->
+          <div class="garden__leaf garden__leaf--l1"></div>
+          <div class="garden__leaf garden__leaf--r1"></div>
+          <div class="garden__leaf garden__leaf--l2"></div>
+          <div class="garden__leaf garden__leaf--r2"></div>
+
+          <!-- Capullo -->
+          <div class="garden__bud"></div>
+
+          <!-- Flor -->
+          <div class="garden__flower">
+            <div class="garden__glow"></div>
+            <span class="garden__petal garden__petal--0"></span>
+            <span class="garden__petal garden__petal--1"></span>
+            <span class="garden__petal garden__petal--2"></span>
+            <span class="garden__petal garden__petal--3"></span>
+            <span class="garden__petal garden__petal--4"></span>
+            <span class="garden__petal garden__petal--5"></span>
+            <span class="garden__petal garden__petal--6"></span>
+            <span class="garden__petal garden__petal--7"></span>
+            <div class="garden__center"></div>
+          </div>
+
+          <!-- Brillo de la floración -->
+          <div class="garden__shine"></div>
+        </div>
+
+        <!-- El campo de flores se genera dinámicamente en garden.js -->
+        <div class="garden__field"></div>
+
+        <!-- Pétalos ambiente (fase final) -->
+        <div class="garden__ambient">
+          <span class="garden__petal-fall garden__petal-fall--1"></span>
+          <span class="garden__petal-fall garden__petal-fall--2"></span>
+          <span class="garden__petal-fall garden__petal-fall--3"></span>
+          <span class="garden__petal-fall garden__petal-fall--4"></span>
+          <span class="garden__petal-fall garden__petal-fall--5"></span>
+          <span class="garden__petal-fall garden__petal-fall--6"></span>
+          <span class="garden__petal-fall garden__petal-fall--7"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Escena 3 · El sobre -->
+    <section id="scene-envelope" class="scene scene--scale" data-scene="envelope" aria-label="El sobre">
+
+      <!-- Mensaje previo (se escribe con typing.js) -->
+      <p class="envelope__message">
+        <span class="envelope__message-text"></span><span class="envelope__message-cursor" aria-hidden="true"></span>
+      </p>
+
+      <!-- Sobre interactivo construido por capas -->
+      <button class="envelope__wrap" type="button" aria-label="Abrir el sobre">
+        <span class="envelope__shadow" aria-hidden="true"></span>
+        <span class="envelope__letter" aria-hidden="true"></span>
+        <span class="envelope__back" aria-hidden="true"></span>
+        <span class="envelope__front" aria-hidden="true"></span>
+        <span class="envelope__flap" aria-hidden="true"></span>
+        <span class="envelope__seal" aria-hidden="true"></span>
+      </button>
+    </section>
+
+    <!-- Escena 4 · La carta -->
+    <section id="scene-letter" class="scene scene--scale" data-scene="letter" aria-label="La carta">
+
+      <article class="letter__paper">
+        <p class="letter__eyebrow">Para ti</p>
+
+        <div class="letter__body">
+          <p class="letter__line">
+            <span class="letter__line-text"></span><span class="letter__line-cursor" aria-hidden="true"></span>
+          </p>
+          <p class="letter__line">
+            <span class="letter__line-text"></span><span class="letter__line-cursor" aria-hidden="true"></span>
+          </p>
+          <p class="letter__line">
+            <span class="letter__line-text"></span><span class="letter__line-cursor" aria-hidden="true"></span>
+          </p>
+          <p class="letter__line">
+            <span class="letter__line-text"></span><span class="letter__line-cursor" aria-hidden="true"></span>
+          </p>
+          <p class="letter__line">
+            <span class="letter__line-text"></span><span class="letter__line-cursor" aria-hidden="true"></span>
+          </p>
+          <p class="letter__line">
+            <span class="letter__line-text"></span><span class="letter__line-cursor" aria-hidden="true"></span>
+          </p>
+        </div>
+
+        <p class="letter__ending" role="text">Espero que este pequeño detalle haya alegrado un poquito tu día. 🌸</p>
+      </article>
+
+      <!-- Pétalos que caen sobre la carta al cierre (se generan en letter.js) -->
+      <div class="letter__petals" aria-hidden="true"></div>
+    </section>
+
+    <!-- Botón global de audio (play/pausa) -->
+    <button
+      id="audio-toggle"
+      class="audio-toggle"
+      type="button"
+      aria-pressed="false"
+      aria-label="Activar música"
+      title="Activar música"
+    >
+      <span class="audio-toggle-icon" aria-hidden="true">♪</span>
+    </button>
+
+  </main>
+
+  <!-- ============================================================
+       SCRIPTS
+       Scripts clásicos que comparten un único namespace global
+       `Flores`. El orden de carga importa:
+       utils → fx → escenas → audio → main.
+  ============================================================ -->
+  <script src="js/utils/dom.js"></script>
+  <script src="js/utils/animations.js"></script>
+  <script src="js/fx/typing.js"></script>
+  <script src="js/fx/particles.js"></script>
+  <script src="js/scenes/intro.js"></script>
+  <script src="js/scenes/garden.js"></script>
+  <script src="js/scenes/envelope.js"></script>
+  <script src="js/scenes/letter.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

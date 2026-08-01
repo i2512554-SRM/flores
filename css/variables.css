@@ -1,0 +1,54 @@
+/* ============================================================
+   variables.css — Tokens de diseño
+   ------------------------------------------------------------
+   Todos los colores, tipografías, sombras, espaciados y
+   temporizadores del proyecto viven aquí para mantener un
+   diseño coherente y fácil de reajustar.
+
+   Estilo: Elegante oscuro · Romántico · Premium
+============================================================ */
+
+:root {
+  /* ---------------- Paleta ---------------- */
+  --color-bg-deep: #0d0a12;             /* fondo más profundo */
+  --color-bg: #141019;                  /* fondo principal     */
+  --color-surface: #1c1626;             /* superficies / tarjetas */
+  --color-border: rgba(255, 255, 255, 0.08);
+
+  --color-accent-pink: #ff7eb6;         /* acento rosa · pétalos */
+  --color-accent-purple: #a66bff;       /* acento púrpura · capullos */
+  --color-accent-gold: #f6c453;         /* acento dorado · toques luminosos */
+
+  --color-text: #f5eef7;                /* texto principal */
+  --color-text-muted: #a89bb0;          /* texto secundario */
+
+  /* ---------------- Tipografías ---------------- */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* ---------------- Sombras / luminiscencia ---------------- */
+  --shadow-glow-pink: 0 0 24px rgba(255, 126, 182, 0.45);
+  --shadow-card: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.35);
+
+  /* ---------------- Espaciado base ---------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 40px;
+  --space-6: 64px;
+
+  /* ---------------- Animación ---------------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 300ms;
+  --duration-med: 600ms;
+  --duration-slow: 1200ms;
+
+  /* ---------------- Capas (z-index) ---------------- */
+  --z-backdrop: 0;
+  --z-scene: 10;
+  --z-overlay: 100;
+  --z-audio: 200;
+}

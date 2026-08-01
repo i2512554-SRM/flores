@@ -1,0 +1,291 @@
+/* ============================================================
+   scenes.css — Escenas, transiciones y botón de audio
+   ------------------------------------------------------------
+   Cada escena ocupa el viewport completo y se alterna con la
+   clase .is-active que controla main.js. Las escenas inactivas
+   quedan ocultas y sin interacción (pointer-events: none).
+============================================================ */
+
+/* ---------------- Escenario ---------------- */
+.stage {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ---------------- Fondo compartido ---------------- */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-backdrop);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(166, 107, 255, 0.18), transparent 45%),
+    radial-gradient(circle at 80% 90%, rgba(255, 126, 182, 0.14), transparent 45%),
+    var(--color-bg-deep);
+}
+
+/* ---------------- Escena base ---------------- */
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-scene);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  text-align: center;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity var(--duration-med) var(--ease-in-out),
+    transform var(--duration-med) var(--ease-in-out),
+    visibility 0s linear var(--duration-med);
+}
+
+/* Escena activa: visible e interactiva */
+.scene.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity var(--duration-med) var(--ease-in-out),
+    transform var(--duration-med) var(--ease-in-out),
+    visibility 0s linear 0s;
+}
+
+/* Variante de transición: entrada con suave escala */
+.scene--scale {
+  transform: scale(0.96);
+}
+.scene--scale.is-active {
+  transform: scale(1);
+}
+
+/* Salida lenta y cinematográfica (usada antes de pasar al sobre) */
+.scene.is-fading {
+  opacity: 0;
+  transition-duration: var(--duration-slow);
+}
+
+/* ---------------- Botón de audio (play/pausa) ---------------- */
+.audio-toggle {
+  position: fixed;
+  top: calc(var(--space-3) + env(safe-area-inset-top));
+  right: var(--space-3);
+  z-index: var(--z-audio);
+
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  color: var(--color-accent-pink);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.audio-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-pink);
+}
+
+.audio-toggle:active {
+  transform: translateY(0) scale(0.94);
+}
+
+/* Estado "música activa": brillo dorado y latido suave del icono */
+.audio-toggle.is-playing {
+  background: linear-gradient(135deg, rgba(246, 196, 83, 0.16), rgba(255, 126, 182, 0.12));
+  border-color: rgba(246, 196, 83, 0.5);
+  color: var(--color-accent-gold);
+  box-shadow: 0 0 22px rgba(246, 196, 83, 0.28);
+}
+
+.audio-toggle-icon {
+  display: inline-block;
+  line-height: 1;
+}
+.audio-toggle.is-playing .audio-toggle-icon {
+  animation: audio-beat 1.2s ease-in-out infinite;
+}
+
+@keyframes audio-beat {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50%      { transform: scale(1.14); opacity: 1; }
+}
+
+/* ---------------- Escena: Introducción ---------------- */
+
+/* Cielo estrellado: capas superpuestas que titilan con opacidad
+   (solo opacity en animación → composición GPU, 60fps). */
+.intro__stars {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.intro__stars-layer {
+  position: absolute;
+  inset: -2%;
+  will-change: opacity;
+  animation: intro-twinkle 6s var(--ease-in-out) infinite;
+}
+.intro__stars-layer--2 { animation-duration: 9s; animation-delay: 1.4s; }
+.intro__stars-layer--3 { animation-duration: 13s; animation-delay: 2.8s; }
+
+@keyframes intro-twinkle {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* Contenido: siempre por encima de las estrellas */
+.intro__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  max-width: 580px;
+}
+
+/* Cabecera "Para ti" con guiones laterales */
+.intro__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-accent-gold);
+  font-size: 0.72rem;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;                 /* compensa el espaciado de la última letra */
+  text-transform: uppercase;
+
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity var(--duration-med) var(--ease-out),
+    transform var(--duration-med) var(--ease-out);
+}
+.intro__eyebrow::before,
+.intro__eyebrow::after {
+  content: "";
+  width: 42px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent-gold));
+}
+.intro__eyebrow::after {
+  background: linear-gradient(90deg, var(--color-accent-gold), transparent);
+}
+.intro__eyebrow.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Frases que se escriben */
+.intro__lines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.intro__line {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.3rem, 5vw, 2.1rem);
+  line-height: 1.4;
+  color: var(--color-text);
+
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity var(--duration-med) var(--ease-out),
+    transform var(--duration-med) var(--ease-out);
+}
+.intro__line.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Cursor de escritura (solo visible mientras se teclea) */
+.intro__line-cursor {
+  display: none;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 4px;
+  vertical-align: -0.12em;
+  background: var(--color-accent-pink);
+  box-shadow: 0 0 10px var(--color-accent-pink);
+}
+.intro__line.is-typing .intro__line-cursor {
+  display: inline-block;
+  animation: intro-blink 1s steps(2, start) infinite;
+}
+
+@keyframes intro-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* Botón "Comenzar" */
+.intro__start {
+  padding: 0.95rem 2.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(246, 196, 83, 0.55);
+  background: rgba(246, 196, 83, 0.04);
+  color: var(--color-accent-gold);
+  font-size: 0.78rem;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+  text-transform: uppercase;
+
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition:
+    opacity var(--duration-med) var(--ease-out),
+    transform var(--duration-med) var(--ease-out),
+    background var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.intro__start.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.intro__start:hover {
+  background: rgba(246, 196, 83, 0.14);
+  box-shadow: 0 0 34px rgba(246, 196, 83, 0.22);
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 480px) {
+  .scene {
+    padding: var(--space-3);
+  }
+
+  .intro__content {
+    gap: var(--space-4);
+  }
+
+  .intro__eyebrow::before,
+  .intro__eyebrow::after {
+    width: 26px;
+  }
+}
